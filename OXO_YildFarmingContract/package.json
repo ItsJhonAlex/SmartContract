@@ -1,0 +1,35 @@
+{
+  "name": "oxo_yieldfarmingcontract",
+  "version": "1.0.0",
+  "description": "Smart contract OXS Yield Farming System con pools de liquidez y rewards dinámicos integrado con Staking y Tier System",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test",
+    "compile": "truffle compile",
+    "migrate": "truffle migrate",
+    "develop": "truffle develop"
+  },
+  "keywords": [
+    "ethereum",
+    "solidity",
+    "yield-farming",
+    "liquidity-pool",
+    "defi",
+    "smart-contract"
+  ],
+  "author": "ItsJhonAlex",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.3.0",
+    "@truffle/hdwallet-provider": "^2.1.15",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.16",
+    "chai": "^4.3.7",
+    "truffle-plugin-verify": "^0.5.25"
+  }
+} 
