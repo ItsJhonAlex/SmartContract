@@ -3,6 +3,7 @@ pragma solidity ^0.8.29;
 
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "../interfaces/IUserManagement.sol";
+import "../libraries/LogarithmLib.sol";
 import "./BaseModule.sol";
 
 /**
@@ -29,6 +30,7 @@ abstract contract UserManagement is IUserManagement, BaseModule {
     
     /**
      * @dev Calcula el peso de un usuario basado en sus métricas
+     * Utiliza una progresión exponencial para el bonus de lock
      * @param stakedAmount Cantidad stakeada
      * @param productivity Productividad
      * @param lockDuration Duración de bloqueo
@@ -45,13 +47,19 @@ abstract contract UserManagement is IUserManagement, BaseModule {
         // Aseguramos que la duración del lock no exceda el máximo
         uint256 validLockDuration = Math.min(lockDuration, MAX_STAKING_WEEKS);
         
-        // Fórmula para calcular el peso:
-        // (stakedAmount * (100 + lockDuration) * (100 + productivity)) / 10000
+        // Calculamos el bonus exponencial de lock usando la nueva fórmula
+        // C(t) = e^(-λ·(104 - t)) donde λ = -ln(0.06)/103
+        uint256 exponentialLockBonus = LogarithmLib.calculateExponentialLockBonus(validLockDuration);
+        
+        // Calculamos el bonus de productividad (mantiene el modelo original)
+        uint256 productivityBonus = 100 + validProductivity;
+        
+        // Fórmula optimizada para calcular el peso:
+        // (stakedAmount * exponentialLockBonus * productivityBonus) / 1000000
+        // Usamos 1000000 como divisor porque exponentialLockBonus está escalado por 10000
+        // y productivityBonus puede ir hasta 200, entonces necesitamos normalizar
         unchecked {
-            uint256 lockBonus = 100 + validLockDuration;
-            uint256 productivityBonus = 100 + validProductivity;
-            
-            return (stakedAmount * lockBonus * productivityBonus) / 10000;
+            return (stakedAmount * exponentialLockBonus * productivityBonus) / 1000000;
         }
     }
     
