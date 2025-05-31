@@ -1,0 +1,32 @@
+{
+  "name": "oxo_smartcontrat",
+  "version": "1.0.0",
+  "description": "Smart contract OXS Token con distribución logarítmica y sistema de pesos proporcionales",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test",
+    "compile": "truffle compile",
+    "migrate": "truffle migrate",
+    "develop": "truffle develop"
+  },
+  "keywords": [
+    "ethereum",
+    "solidity",
+    "token",
+    "smart-contract"
+  ],
+  "author": "ItsJhonAlex",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.3.0",
+    "@truffle/hdwallet-provider": "^2.1.15",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.16",
+    "chai": "^4.3.7"
+  }
+}
