@@ -3,11 +3,13 @@ pragma solidity ^0.8.29;
 
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "../interfaces/ITierManagement.sol";
+import "../libraries/LogarithmLib.sol";
 import "./BaseModule.sol";
 
 /**
  * @title TierManagement
  * @dev Implementación del módulo de gestión de Tiers
+ * Integrado con progresión exponencial basada en tiempo de staking
  */
 abstract contract TierManagement is ITierManagement, BaseModule {
     /**
@@ -22,7 +24,7 @@ abstract contract TierManagement is ITierManagement, BaseModule {
      * @param name Nombre del Tier
      * @param requiredTokens Cantidad de tokens requeridos
      * @param cashValue Valor en efectivo
-     * @param conversionRate Tasa de conversión
+     * @param conversionRate Tasa de conversión (ahora solo inicial, se actualiza dinámicamente)
      */
     function addTier(
         string calldata name,
@@ -37,7 +39,7 @@ abstract contract TierManagement is ITierManagement, BaseModule {
             name: name,
             requiredTokens: requiredTokens,
             cashValue: cashValue,
-            conversionRate: conversionRate,
+            conversionRate: conversionRate, // Valor inicial, se actualiza dinámicamente
             isActive: true
         });
         
@@ -53,7 +55,7 @@ abstract contract TierManagement is ITierManagement, BaseModule {
      * @param name Nuevo nombre
      * @param requiredTokens Nueva cantidad de tokens requeridos
      * @param cashValue Nuevo valor en efectivo
-     * @param conversionRate Nueva tasa de conversión
+     * @param conversionRate Nueva tasa de conversión inicial
      */
     function updateTier(
         uint256 tierId,
@@ -69,7 +71,7 @@ abstract contract TierManagement is ITierManagement, BaseModule {
             name: name,
             requiredTokens: requiredTokens,
             cashValue: cashValue,
-            conversionRate: conversionRate,
+            conversionRate: conversionRate, // Valor inicial, se actualiza dinámicamente
             isActive: true
         });
         
@@ -78,6 +80,7 @@ abstract contract TierManagement is ITierManagement, BaseModule {
     
     /**
      * @dev Actualiza el Tier de un usuario basado en su stake
+     * Ahora también registra el tiempo de staking si es la primera vez
      * @param user Dirección del usuario
      * @param stakedAmount Cantidad stakeada
      */
@@ -88,13 +91,23 @@ abstract contract TierManagement is ITierManagement, BaseModule {
         uint256 oldTier = userInfo.currentTier;
         uint256 newTier = calculateTier(stakedAmount);
         
+        // Si es la primera vez que el usuario hace staking, registramos el tiempo
+        if (userStakingStart[user] == 0 && stakedAmount > 0) {
+            userStakingStart[user] = block.timestamp;
+        }
+        
         if (oldTier != newTier) {
             userInfo.currentTier = newTier;
             userInfo.stakedAmount = stakedAmount;
             userInfo.lastUpdate = block.timestamp;
-            userInfo.isActive = true;
+            userInfo.isActive = stakedAmount > 0;
             
             emit TierUpdated(user, oldTier, newTier, block.timestamp);
+        } else if (userInfo.stakedAmount != stakedAmount) {
+            // Actualizamos la cantidad stakeada aunque el tier no cambie
+            userInfo.stakedAmount = stakedAmount;
+            userInfo.lastUpdate = block.timestamp;
+            userInfo.isActive = stakedAmount > 0;
         }
     }
     
@@ -104,7 +117,7 @@ abstract contract TierManagement is ITierManagement, BaseModule {
      * @return name Nombre del Tier
      * @return requiredTokens Tokens requeridos
      * @return cashValue Valor en efectivo
-     * @return conversionRate Tasa de conversión
+     * @return conversionRate Tasa de conversión inicial (estática)
      * @return isActive Si el Tier está activo
      */
     function getTierInfo(uint256 tierId) external view override returns (
@@ -121,7 +134,7 @@ abstract contract TierManagement is ITierManagement, BaseModule {
             tier.name,
             tier.requiredTokens,
             tier.cashValue,
-            tier.conversionRate,
+            tier.conversionRate, // Conversion rate inicial/base
             tier.isActive
         );
     }
@@ -147,6 +160,36 @@ abstract contract TierManagement is ITierManagement, BaseModule {
             userInfo.stakedAmount,
             userInfo.lastUpdate,
             userInfo.isActive
+        );
+    }
+    
+    /**
+     * @dev Obtiene información detallada del Tier de un usuario con conversion rate dinámica
+     * @param user Dirección del usuario
+     * @return tierId ID del Tier actual
+     * @return stakedAmount Cantidad stakeada
+     * @return lastUpdate Última actualización
+     * @return isActive Si el usuario está activo
+     * @return dynamicConversionRate Conversion rate basada en tiempo de staking
+     * @return stakingWeeks Semanas de staking
+     */
+    function getUserTierInfoDetailed(address user) external view returns (
+        uint256 tierId,
+        uint256 stakedAmount,
+        uint256 lastUpdate,
+        bool isActive,
+        uint256 dynamicConversionRate,
+        uint256 stakingWeeks
+    ) {
+        UserTierInfo storage userInfo = userTiers[user];
+        
+        return (
+            userInfo.currentTier,
+            userInfo.stakedAmount,
+            userInfo.lastUpdate,
+            userInfo.isActive,
+            getUserDynamicConversionRate(user),
+            getUserStakingWeeks(user)
         );
     }
     

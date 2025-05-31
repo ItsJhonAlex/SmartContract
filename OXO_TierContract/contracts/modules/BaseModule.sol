@@ -3,10 +3,12 @@ pragma solidity ^0.8.29;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/ITierManagement.sol";
+import "../libraries/LogarithmLib.sol";
 
 /**
  * @title BaseModule
  * @dev Módulo base que contiene las variables compartidas entre todos los módulos
+ * Integrado con la progresión exponencial del sistema de Staking
  */
 abstract contract BaseModule is Ownable {
     // Constantes compartidas
@@ -16,6 +18,7 @@ abstract contract BaseModule is Ownable {
     // Variables de estado compartidas
     mapping(uint256 => ITierManagement.TierInfo) public tiers;
     mapping(address => ITierManagement.UserTierInfo) public userTiers;
+    mapping(address => uint256) public userStakingStart; // Tiempo de inicio de staking por usuario
     
     // Array para rastrear Tiers activos
     uint256[] public activeTiers;
@@ -37,6 +40,7 @@ abstract contract BaseModule is Ownable {
     
     /**
      * @dev Inicializa los Tiers por defecto según Tiers.csv
+     * Ahora usa conversion rates dinámicas basadas en progresión exponencial
      */
     function _initializeDefaultTiers() private {
         // Tier 1: Elevator
@@ -44,7 +48,7 @@ abstract contract BaseModule is Ownable {
             name: "Elevator",
             requiredTokens: 2000 * 10**18, // 2000 tokens
             cashValue: 300, // 300$
-            conversionRate: 10000000000000, // 0.01
+            conversionRate: 600, // Valor inicial (6%), se actualiza dinámicamente
             isActive: true
         });
         
@@ -53,7 +57,7 @@ abstract contract BaseModule is Ownable {
             name: "Premium Elevator",
             requiredTokens: 10000 * 10**18, // 10000 tokens
             cashValue: 1500, // 1500$
-            conversionRate: 10457249638000, // 0.010457249638
+            conversionRate: 600, // Valor inicial (6%), se actualiza dinámicamente
             isActive: true
         });
         
@@ -62,7 +66,7 @@ abstract contract BaseModule is Ownable {
             name: "VIP ELEVATOR",
             requiredTokens: 34000 * 10**18, // 34000 tokens
             cashValue: 5100, // 5100$
-            conversionRate: 10935406999200, // 0.0109354069992
+            conversionRate: 600, // Valor inicial (6%), se actualiza dinámicamente
             isActive: true
         });
         
@@ -71,5 +75,46 @@ abstract contract BaseModule is Ownable {
             activeTiers.push(i);
             isTierActive[i] = true;
         }
+    }
+    
+    /**
+     * @dev Calcula la conversion rate dinámica para un usuario basada en su tiempo de staking
+     * Usa la misma progresión exponencial que el sistema de Staking
+     * @param user Dirección del usuario
+     * @return Conversion rate actual basada en semanas de staking
+     */
+    function getUserDynamicConversionRate(address user) public view returns (uint256) {
+        uint256 stakingStartTime = userStakingStart[user];
+        if (stakingStartTime == 0) {
+            return 600; // Valor mínimo si no ha empezado staking
+        }
+        
+        // Calculamos las semanas transcurridas desde el inicio del staking
+        uint256 stakingWeeks = (block.timestamp - stakingStartTime) / (7 * 24 * 60 * 60);
+        
+        // Retornamos la conversion rate basada en la progresión exponencial
+        return LogarithmLib.calculateTierConversionRate(stakingWeeks);
+    }
+    
+    /**
+     * @dev Actualiza el tiempo de inicio de staking para un usuario
+     * Esta función debe ser llamada cuando el usuario empiece a hacer staking
+     * @param user Dirección del usuario
+     */
+    function setUserStakingStart(address user) external onlyOwner {
+        userStakingStart[user] = block.timestamp;
+    }
+    
+    /**
+     * @dev Obtiene las semanas de staking de un usuario
+     * @param user Dirección del usuario
+     * @return Número de semanas que ha estado haciendo staking
+     */
+    function getUserStakingWeeks(address user) public view returns (uint256) {
+        uint256 stakingStartTime = userStakingStart[user];
+        if (stakingStartTime == 0) {
+            return 0;
+        }
+        return (block.timestamp - stakingStartTime) / (7 * 24 * 60 * 60);
     }
 } 
