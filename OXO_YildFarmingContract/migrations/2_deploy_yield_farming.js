@@ -1,5 +1,6 @@
 const YieldMath = artifacts.require("YieldMath");
 const OXSYieldFarming = artifacts.require("OXSYieldFarming");
+const MockERC20 = artifacts.require("MockERC20");
 
 module.exports = async function (deployer, network, accounts) {
   // En desarrollo, usamos la cuenta del desplegador como owner
@@ -26,27 +27,30 @@ module.exports = async function (deployer, network, accounts) {
     const yieldFarmingContract = await OXSYieldFarming.deployed();
     console.log("✅ OXSYieldFarming desplegado en:", yieldFarmingContract.address);
     
-    // 4. Configuraciones iniciales para desarrollo
-    if (network === 'development' || network === 'develop') {
-      console.log("⚙️ Configurando contratos para desarrollo...");
+    // 4. Deploy mock tokens for testing
+    if (network === 'development' || network === 'develop' || network === 'test') {
+      console.log("🪙 Desplegando tokens mock para testing...");
       
-      // Direcciones de ejemplo para testing (deben ser reemplazadas en producción)
-      const oxsTokenAddress = "0x0000000000000000000000000000000000000000"; // TODO: Reemplazar
-      const stakingContractAddress = "0x0000000000000000000000000000000000000000"; // TODO: Reemplazar  
-      const tierContractAddress = "0x0000000000000000000000000000000000000000"; // TODO: Reemplazar
+      // Deploy OXS mock token
+      await deployer.deploy(MockERC20, "Mock OXS Token", "MOXS", 18);
+      const oxsToken = await MockERC20.deployed();
+      console.log("✅ Mock OXS Token desplegado en:", oxsToken.address);
       
-      console.log("⚠️  IMPORTANTE: Actualizar direcciones de contratos después del despliegue:");
-      console.log("   - OXS Token Address:", oxsTokenAddress);
-      console.log("   - Staking Contract Address:", stakingContractAddress);
-      console.log("   - Tier Contract Address:", tierContractAddress);
+      // Deploy TokenA for liquidity pools
+      await deployer.deploy(MockERC20, "Mock Token A", "MTKA", 18);
+      const tokenA = await MockERC20.deployed();
+      console.log("✅ Mock Token A desplegado en:", tokenA.address);
       
-      // Para testing, inicializamos con direcciones dummy (se pueden actualizar después)
-      // await yieldFarmingContract.initializeContracts(
-      //   oxsTokenAddress,
-      //   stakingContractAddress,
-      //   tierContractAddress,
-      //   { from: owner }
-      // );
+      // Deploy TokenB for liquidity pools  
+      await deployer.deploy(MockERC20, "Mock Token B", "MTKB", 18);
+      const tokenB = await MockERC20.deployed();
+      console.log("✅ Mock Token B desplegado en:", tokenB.address);
+      
+      console.log("⚠️  IMPORTANTE para desarrollo:");
+      console.log("   - Usando MockERC20 para testing");
+      console.log("   - OXS Token Address:", oxsToken.address);
+      console.log("   - Token A Address:", tokenA.address);
+      console.log("   - Token B Address:", tokenB.address);
     }
     
     console.log("\n🎉 ¡Despliegue completado exitosamente!");

@@ -63,10 +63,14 @@ module.exports = {
     // You should run a client (like ganache, geth, or parity) in a separate terminal
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
+    // 
+    // Local development network
     development: {
-     host: "127.0.0.1",     // Localhost (default: none)
-     port: 7545,            // Standard Ethereum port (default: none)
-     network_id: "*",       // Any network (default: none)
+      host: "127.0.0.1",     // Localhost (default: none)
+      port: 8545,            // Port de Ganache
+      network_id: "*",       // Any network (default: none)
+      gas: 6721975,          // Gas limit
+      gasPrice: 20000000000, // 20 gwei
     },
     
     // Polygon Mumbai Testnet

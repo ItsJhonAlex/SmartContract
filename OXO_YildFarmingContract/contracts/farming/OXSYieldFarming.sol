@@ -49,7 +49,7 @@ contract OXSYieldFarming is IYieldFarming, BaseModule {
         uint256 feeInitial,
         uint256 feeFinal,
         uint256 vestingWeeks
-    ) external override onlyOwner returns (uint256 poolId) {
+    ) external override onlyOwner whenNotPaused returns (uint256 poolId) {
         require(totalPools < MAX_POOLS, "Maximo numero de pools alcanzado");
         require(tokenA != address(0) && tokenB != address(0), "Direcciones de tokens invalidas");
         require(tokenA != tokenB, "Tokens deben ser diferentes");

@@ -1,0 +1,53 @@
+{
+  "name": "oxs-defi-ecosystem",
+  "version": "1.0.0",
+  "description": "🌟 OXS DeFi Ecosystem - Staking + Tier + Yield Farming",
+  "main": "ecosystem-deploy.js",
+  "scripts": {
+    "compile:all": "npm run compile:staking && npm run compile:tier && npm run compile:yield",
+    "compile:staking": "cd OXO_StakingContract && pnpm install && truffle compile",
+    "compile:tier": "cd OXO_TierContract && pnpm install && truffle compile",
+    "compile:yield": "cd OXO_YildFarmingContract && pnpm install && truffle compile",
+    "test:all": "npm run test:staking && npm run test:tier && npm run test:yield",
+    "test:staking": "cd OXO_StakingContract && truffle test",
+    "test:tier": "cd OXO_TierContract && truffle test",
+    "test:yield": "cd OXO_YildFarmingContract && truffle test",
+    "deploy:local": "node ecosystem-deploy.js local",
+    "deploy:sepolia": "node ecosystem-deploy.js sepolia",
+    "deploy:mumbai": "node ecosystem-deploy.js mumbai",
+    "setup:env": "cp .env.example .env",
+    "setup:ganache": "ganache-cli --deterministic --accounts 10 --host 0.0.0.0 --port 8545",
+    "verify:contracts": "node scripts/verify-contracts.js",
+    "integration:test": "node scripts/integration-tests.js",
+    "generate:docs": "node scripts/generate-docs.js"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.5.0",
+    "web3": "^4.16.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.0",
+    "ganache-cli": "^6.12.2",
+    "mocha": "^10.0.0",
+    "truffle": "^5.11.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/username/oxs-defi-ecosystem.git"
+  },
+  "keywords": [
+    "defi",
+    "staking",
+    "yield-farming",
+    "tier-system",
+    "ethereum",
+    "solidity",
+    "dapp"
+  ],
+  "author": "OXS Team",
+  "license": "MIT"
+}
