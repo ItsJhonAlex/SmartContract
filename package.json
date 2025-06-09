@@ -13,7 +13,7 @@
     "test:tier": "cd OXO_TierContract && truffle test",
     "test:yield": "cd OXO_YildFarmingContract && truffle test",
     "deploy:local": "node ecosystem-deploy.js local",
-    "deploy:sepolia": "node ecosystem-deploy.js sepolia",
+    "deploy:sepolia": "node scripts/deploy-sepolia.js",
     "deploy:mumbai": "node ecosystem-deploy.js mumbai",
     "integrate:local": "node scripts/integrate-ecosystem.js",
     "test:integration": "npm run integrate:local && npm run test:all",
