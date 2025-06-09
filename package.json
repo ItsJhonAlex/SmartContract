@@ -15,6 +15,9 @@
     "deploy:local": "node ecosystem-deploy.js local",
     "deploy:sepolia": "node ecosystem-deploy.js sepolia",
     "deploy:mumbai": "node ecosystem-deploy.js mumbai",
+    "integrate:local": "node scripts/integrate-ecosystem.js",
+    "test:integration": "npm run integrate:local && npm run test:all",
+    "test:integration-only": "npm run integrate:local && npx mocha test/integration/ecosystem-integration.test.js --timeout 60000",
     "setup:env": "cp .env.example .env",
     "setup:ganache": "ganache-cli --deterministic --accounts 10 --host 0.0.0.0 --port 8545",
     "verify:contracts": "node scripts/verify-contracts.js",
@@ -27,6 +30,7 @@
     "web3": "^4.16.0"
   },
   "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.16",
     "chai": "^4.3.0",
     "ganache-cli": "^6.12.2",
     "mocha": "^10.0.0",
@@ -34,10 +38,6 @@
   },
   "engines": {
     "node": ">=16.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/username/oxs-defi-ecosystem.git"
   },
   "keywords": [
     "defi",
