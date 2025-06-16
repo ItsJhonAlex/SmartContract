@@ -106,8 +106,10 @@ abstract contract BaseModule is Ownable, ReentrancyGuard, Pausable {
             abi.encodeWithSignature("getUserTierInfo(address)", user)
         );
         
-        if (success && result.length >= 32) {
-            return abi.decode(result, (uint256));
+        if (success && result.length > 0) {
+            // Decodificar la tupla completa y extraer solo el tierId
+            (uint256 tierId, , , ) = abi.decode(result, (uint256, uint256, uint256, bool));
+            return tierId;
         }
         
         return 0;

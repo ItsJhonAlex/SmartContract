@@ -75,7 +75,7 @@ class SepoliaDeployer {
         
         console.log(`💳 Balance: ${balanceEth} Sepolia ETH`);
         
-        if (parseFloat(balanceEth) < 0.1) {
+        if (parseFloat(balanceEth) < 0.04) {
             console.error('⚠️ Balance insuficiente!');
             console.error('💡 Obtén Sepolia ETH en:');
             console.error('   - https://faucets.io/');
